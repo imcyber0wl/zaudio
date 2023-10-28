@@ -4,3 +4,4 @@ pydub==0.25.1
 celery==5.1.0
 importlib-metadata==4.13.0
 django==3.2.22
+django-bootstrap-v5==1.0.11
