@@ -3,4 +3,4 @@ python-dotenv==0.21.1
 pydub==0.25.1
 celery==5.1.0
 importlib-metadata==4.13.0
-django==4.2.6
+django==3.2.22
