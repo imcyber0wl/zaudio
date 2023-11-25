@@ -1,4 +1,3 @@
-#### when deploying on linux put all paths in os.path.normcase() 
 from django.shortcuts import render
 from .forms import FileForm
 from django.conf import settings
@@ -7,13 +6,18 @@ from .tasks import *
 import random 
 import subprocess
 from celery import Celery
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse,FileResponse
 import json
 import time
+import os
 
 # Create your views here.
 @csrf_exempt
 def home(request):
+    x=os.path.join(settings.BASE_DIR, "files")
+    #y=str(settings.BASE_DIR)+"files"
+    #print(y,type(y))
+    #print(x,type(x))
     values=['aac','wav','mp3','ogg','mp4','flv']
     form=FileForm()
     
@@ -42,18 +46,23 @@ def home(request):
                     else:
                         pass #skip any unsupported file type
                 except:
+                    print(file,"was not uploaded")  ###added this 
+                    file_list2.append("x")          ###added this
                     pass
 
             c=0
-            js_list=[]
+            js_list=''
             for file in file_list2:
-                path,input_file=handle_uploaded_file(request.FILES[file])
-                js_list.append(input_file[0:len(input_file)-3]+formats2[c]) #new file
-                #print(input_file[0:len(input_file)-3]+formats2[c])
-                convert_audio.delay(path,input_file,formats2[c])
-                c+=1
+                if file=="x": ###added this
+                    js_list+=file+'/' ###added this
+                else:###added this
+                    path,input_file=handle_uploaded_file(request.FILES[file])
+                    js_list+=(input_file[0:len(input_file)-3]+formats2[c])+'/' #new file
+                    #print(input_file[0:len(input_file)-3]+formats2[c])
+                    convert_audio.delay(path,input_file,formats2[c])
+                    c+=1
 
-            ff=''
+            '''ff=''
             c=0
             for file in js_list:
                 if c==0:
@@ -61,9 +70,9 @@ def home(request):
                 else:
                     ff+="file"+str(c)+"="+file+"&"
 
-                c+=1
+                c+=1'''
 
-            return render(request,'wait.html',{'files':js_list,'ff':ff})
+            return render(request,'wait.html',{'files':js_list,'ff':js_list}) ###added this
             
                 
     return render(request,'home.html',{'form':form,'values':values})
@@ -71,7 +80,7 @@ def home(request):
 
 def handle_uploaded_file(f):
     rn_name=random.randint(100,20000)
-    path=str(settings.BASE_DIR)+"\\converter\\files\\"
+    path=str(settings.BASE_DIR)+"\\files\\"
     with open(path+str(rn_name)+f.name, "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
@@ -79,13 +88,15 @@ def handle_uploaded_file(f):
     return path,str(rn_name)+f.name
 
 
-def download_view(request):
+def download_view(request,file1,file2,file3,file4,file5,file6,file7,file8): ###added this
     files=[]
-    file_list=['file','file2','file3','file4',
-                       'file5','file6','file7','file8']
+    file_list=[file1,file2,file3,file4,file5,file6,file7,file8] ###added this
     for file in file_list:
         try:
-            files.append(request.GET[file])
+            if file=="x": ###added this
+                pass###added this
+            else:###added this
+                files.append(file)
         except:
             pass
 
@@ -99,7 +110,6 @@ def check_file(request):
     file= data['file']
     path=str(settings.BASE_DIR)+"\\files\\"
     result=404
-    #print(path+file)
     try:
         open(path+file,"r")
         result=200
@@ -107,3 +117,11 @@ def check_file(request):
         pass
     return HttpResponse("Text only, please.", status=result)
     
+
+def download(request):
+    try:
+        #filename=request.GET['file']
+        return FileResponse(open(str(settings.BASE_DIR)+'\\files\\'+filename, 'rb'), as_attachment=True)
+    except:
+        return HttpResponse("Access denied",status=403)
+        
