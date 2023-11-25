@@ -1,3 +1,4 @@
+#### when deploying on linux put all paths in os.path.normcase() 
 from django.shortcuts import render
 from .forms import FileForm
 from django.conf import settings
