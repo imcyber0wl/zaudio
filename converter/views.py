@@ -1,3 +1,4 @@
+#when deploying on linux include every path in os.path.normcase(), this was originally written and tested on windows 
 from django.shortcuts import render
 from .forms import FileForm
 from django.conf import settings
