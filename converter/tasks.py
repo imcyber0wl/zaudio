@@ -1,3 +1,4 @@
+#pro tip: put this whole file in one big try except...
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from pydub import AudioSegment 
